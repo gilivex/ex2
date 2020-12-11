@@ -1,8 +1,10 @@
 package api;
 
-import java.util.List;
+import java.util.*;
 
 public class DWGraph_Algo implements dw_graph_algorithms {
+    DWGraph_DS g;
+
     /**
      * Init the graph on which this set of algorithms operates on.
      *
@@ -10,7 +12,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
      */
     @Override
     public void init(directed_weighted_graph g) {
-
+        this.g = (DWGraph_DS) g;
     }
 
     /**
@@ -20,7 +22,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
      */
     @Override
     public directed_weighted_graph getGraph() {
-        return null;
+        return this.g;
     }
 
     /**
@@ -31,7 +33,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
     @Override
     public directed_weighted_graph copy() {
         return null;
-    }
+    } // TODO implement
 
     /**
      * Returns true if and only if (iff) there is a valid path from each node to each
@@ -42,7 +44,7 @@ public class DWGraph_Algo implements dw_graph_algorithms {
     @Override
     public boolean isConnected() {
         return false;
-    }
+    } // TODO implement
 
     /**
      * returns the length of the shortest path between src to dest
@@ -54,7 +56,18 @@ public class DWGraph_Algo implements dw_graph_algorithms {
      */
     @Override
     public double shortestPathDist(int src, int dest) {
-        return 0;
+        // check if source and destination exist
+        if (this.g.getNode(src) == null || this.g.getNode(dest) == null) {
+            return -1;
+        }
+
+        HashMap<Node_DS, Node_DS> prev = dijkstra(src, dest);
+        Node_DS node = prev.get(this.g.getNode(dest));
+        // check if the destination has been reached
+        if (node == null) {
+            return -1;
+        }
+        return this.g.getNode(dest).getTag();
     }
 
     /**
@@ -69,7 +82,80 @@ public class DWGraph_Algo implements dw_graph_algorithms {
      */
     @Override
     public List<node_data> shortestPath(int src, int dest) {
+        ArrayList<node_data> path = new ArrayList<>();
+        // check if source and destination exist
+        if (this.g.getNode(src) == null || this.g.getNode(dest) == null) {
+            return null;
+        }
+
+        HashMap<Node_DS, Node_DS> prev = dijkstra(src, dest);
+//        ArrayList<Node_DS> prev = dijkstra(src);
+
+        Node_DS node = prev.get(this.g.getNode(dest));
+        // check if the destination has been reached
+        if (node == null) {
+            return null;
+        }
+        while (node != null) {
+            path.add(node);
+            node = prev.get(node);
+        }
+
+        Collections.reverse(path);
+        path.add((Node_DS) this.g.getNode(dest));
+        if (path.get(0).getKey() == src) {
+            return path;
+        }
         return null;
+    }
+
+    private HashMap<Node_DS, Node_DS> dijkstra(int src, int dest) {
+        HashMap<Node_DS, Node_DS> prevDict = new HashMap<>(); //TODO Pqueue
+        double w;
+        for (node_data node : this.g.getV()) {
+            node.setInfo("white"); // not visited
+            node.setTag(-1); // no distance from src
+            prevDict.put((Node_DS) node, null);
+        }
+        Node_DS node = (Node_DS) this.g.getNode(src);
+        if (node == null) {
+            System.out.println("source node doesn't exist");
+            return null;
+        }
+
+        PriorityQueue<Node_DS> pq = new PriorityQueue<>();
+        pq.add(node);
+        node.setTag(0);
+
+        while (!pq.isEmpty()) {
+            node = pq.poll();
+            if (node.getKey() == dest) {
+                return prevDict;
+            }
+            for (Node_DS neighbor : node.getNi()) {
+                if (neighbor.getInfo().equals("white")) {
+//                    w = this.g.getEdge(node.getKey(), neighbor.getKey());
+                    w = node.getNiW(neighbor);
+                    // if never visited add first distance
+                    if (neighbor.getTag() == -1) {
+                        neighbor.setTag((int) (node.getTag() + w)); // TODO change to double
+                        prevDict.replace(neighbor, node);
+                    }
+                    // check if distance can improve
+                    if (neighbor.getTag() > node.getTag()+w) {
+                        neighbor.setTag((int) (node.getTag() + w));
+                        prevDict.replace(neighbor, node);
+                    }
+                    // add node to search queue
+//                    q.add(neighbor);
+                    pq.add(neighbor);
+                }
+            }
+            // mark as visited
+            node.setInfo("black");
+        }
+
+        return prevDict;
     }
 
     /**
