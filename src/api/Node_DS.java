@@ -2,18 +2,22 @@ package api;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-public class Node_DS implements node_data, Comparable<node_data>  {
-    ArrayList<Node_DS> neighbors;
+public class Node_DS implements node_data, Serializable, Comparable<node_data>  {
+    transient ArrayList<Node_DS> neighbors;
     ArrayList<Double> weights;
     String color;
     int tag;
     int key;
 
     public Node_DS(int key) {
+        this.neighbors = new ArrayList<>();
+        this.weights = new ArrayList<>();
+        this.color = "";
         this.key = key;
     }
     @Override
@@ -79,15 +83,17 @@ public class Node_DS implements node_data, Comparable<node_data>  {
 
     public void addNi(node_data t) {
         this.neighbors.add((Node_DS) t);
-        this.weights.add(null);
+        this.weights.add(-1.0);
     }
 
     public void addNiW(node_data t, double weight) {
-        this.weights.set(t.getKey(), weight);
+        int key = this.neighbors.indexOf(t);
+        this.weights.set(key, weight);
     }
 
     public double getNiW(node_data t) {
-        return this.weights.get(t.getKey());
+        int key = this.neighbors.indexOf(t);
+        return this.weights.get(key);
     }
 
     public void removeNode(node_data node) {
@@ -95,7 +101,7 @@ public class Node_DS implements node_data, Comparable<node_data>  {
             return;
         }
         this.neighbors.remove(node);
-        this.weights.set(node.getKey(), null);
+        this.weights.set(node.getKey(), -1.0);
     }
 
     @Override

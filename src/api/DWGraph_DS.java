@@ -1,22 +1,24 @@
 package api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-public class DWGraph_DS implements directed_weighted_graph {
+public class DWGraph_DS implements directed_weighted_graph, Serializable {
     ArrayList<node_data> nodes;
     int edgeCount;
     int mc = 0;
     int nodeCount = 0;
 
-    public DWGraph_DS(Collection<node_data> nodes, int edgeCount) {
+    public DWGraph_DS(Collection<node_data> nodes, int edgeCount, int nodeCount) {
         this.nodes = new ArrayList<>(nodes);
         this.edgeCount = edgeCount;
+        this.nodeCount = nodeCount;
     }
 
     public DWGraph_DS() {
-        this(new ArrayList<>(), 0);
+        this(new ArrayList<>(), 0, 0);
     }
 
     public DWGraph_DS(DWGraph_DS g) {
@@ -210,6 +212,25 @@ public class DWGraph_DS implements directed_weighted_graph {
             if (this.nodes.get(key) != null) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        // Check if o is an instance of the graph
+        if (!(o instanceof DWGraph_DS)) {
+            return false;
+        }
+        // compare data members
+        DWGraph_DS other = (DWGraph_DS) o;
+        if (this.nodes == null && other.nodes == null) {
+            return this.nodeCount == other.nodeCount && this.edgeCount == other.edgeCount && this.mc == other.mc;
+        } else if (this.nodes != null && other.nodes != null) {
+            return this.nodeCount == other.nodeCount && this.edgeCount == other.edgeCount && this.mc == other.mc && this.nodes.equals(other.nodes);
         }
         return false;
     }

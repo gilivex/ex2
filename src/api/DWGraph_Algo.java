@@ -1,8 +1,13 @@
 package api;
 
+import java.io.*;
 import java.util.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class DWGraph_Algo implements dw_graph_algorithms {
+    Gson gson;
+    String fileName = "src/api/graph.json";
     DWGraph_DS g;
 
     /**
@@ -167,6 +172,23 @@ public class DWGraph_Algo implements dw_graph_algorithms {
      */
     @Override
     public boolean save(String file) {
+        this.gson = new Gson();
+//        Gson gson= newGsonBuilder().create();
+//        Node_DS nodeDS = (Node_DS) this.getGraph().getNode(0);
+//        String node = gson.toJson(nodeDS);
+//        String nodeNi = gson.toJson(nodeDS.getNi());
+        String wdGraph = gson.toJson(this.getGraph());
+
+        try {
+            FileWriter fw = new FileWriter(fileName);
+            PrintWriter outs = new PrintWriter(fw);
+            outs.println(wdGraph);
+            outs.close();
+            fw.close();
+        } catch(IOException e) {
+            System.out.print("Error writing file\n" + e);
+        }
+
         return false;
     }
 
@@ -181,6 +203,29 @@ public class DWGraph_Algo implements dw_graph_algorithms {
      */
     @Override
     public boolean load(String file) {
+        String str;
+        try {
+            FileReader fr = new FileReader(fileName);
+            BufferedReader br = new BufferedReader(fr);
+            str = br.readLine();
+            System.out.println(0+") "+str);
+            for (int i=1; str!=null; i=i+1) {
+                str = br.readLine();
+                if (str != null) {
+                    System.out.println(i+") "+str);
+                }
+            }
+            br.close();
+            fr.close();
+        } catch(IOException ex) {
+            System.out.print("Error reading file\n" + ex);
+            return false;
+        }
+        // String g5 = gson.fromJson("\"abc\"", String.class); //print ->abc
+        // int[] g6 = gson.fromJson(s6, int[].class);//print ->[1, 2, 4]
+        // Person g7 = gson.fromJson(s7, Person.class);
+        DWGraph_DS dwGraph = this.gson.fromJson(str, DWGraph_DS.class);
+
         return false;
     }
 }
